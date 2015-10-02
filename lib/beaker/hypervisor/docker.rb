@@ -100,6 +100,8 @@ module Beaker
           ip = URI.parse(ENV['DOCKER_HOST']).host
         else
           # Swarm or local docker host
+          require 'pp'
+          pp container.json
           ip = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostIp"]
         end
 

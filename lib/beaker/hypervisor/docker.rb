@@ -64,10 +64,15 @@ module Beaker
           image_name = image.id
         end
 
-        container_opts = {
+        default_container_opts = {
           'Image' => image_name,
           'Hostname' => host.name,
         }
+        container_opts = default_container_opts.merge(host['docker_container_options'] || {})
+        puts "host"
+        pp host
+        puts "container_opts"
+        pp container_opts
 
         unless host['docker_container_name'].nil?
           @logger.debug("Looking for an existing container called #{host['docker_container_name']}")
@@ -87,8 +92,13 @@ module Beaker
           container = ::Docker::Container.create(container_opts)
         end
 
+        default_start_opts = {
+          "PublishAllPorts" => true,
+          "Privileged" => true,
+        }
+        start_opts = default_start_opts.merge(host['docker_container_start_options'] || {})
         @logger.debug("Starting container #{container.id}")
-        container.start({"PublishAllPorts" => true, "Privileged" => true})
+        container.start(start_opts)
 
         # Find out where the ssh port is from the container
         # When running on swarm DOCKER_HOST points to the swarm manager so we have to get the
